@@ -1,0 +1,127 @@
+﻿@page "/clientes"
+@inject ClienteService ClienteService
+@using TiendaOnline.WASM.Models
+@using TiendaOnline.WASM.Services
+
+<PageTitle>Clientes</PageTitle>
+<h1>Clientes</h1>
+
+<EditForm Model="@clienteEnEdicion" OnValidSubmit="GuardarCliente">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-2">
+        <label>Nombre</label>
+        <InputText class="form-control" @bind-Value="clienteEnEdicion.Nombre" />
+    </div>
+    <div class="mb-2">
+        <label>Email</label>
+        <InputText class="form-control" @bind-Value="clienteEnEdicion.Email" />
+    </div>
+    <div class="mb-2">
+        <label>Teléfono</label>
+        <InputText class="form-control" @bind-Value="clienteEnEdicion.Telefono" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(clienteEnEdicion.IdCliente == 0 ? "Crear cliente" : "Guardar cambios")
+    </button>
+    @if (clienteEnEdicion.IdCliente != 0)
+    {
+        <button type="button" class="btn btn-secondary" @onclick="CancelarEdicion">
+            Cancelar
+        </button>
+    }
+</EditForm>
+
+<hr />
+
+@if (clientes == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in clientes)
+            {
+                <tr>
+                    <td>@cliente.IdCliente</td>
+                    <td>@cliente.Nombre</td>
+                    <td>@cliente.Email</td>
+                    <td>@cliente.Telefono</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => EditarCliente(cliente)">
+                            Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => EliminarCliente(cliente.IdCliente)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Cliente>? clientes;
+    private Cliente clienteEnEdicion = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarClientes();
+    }
+
+    private async Task CargarClientes()
+    {
+        clientes = await ClienteService.ObtenerClientesAsync();
+    }
+
+    private async Task GuardarCliente()
+    {
+        if (clienteEnEdicion.IdCliente == 0)
+        {
+            await ClienteService.CrearClienteAsync(clienteEnEdicion);
+        }
+        else
+        {
+            await ClienteService.ActualizarClienteAsync(clienteEnEdicion);
+        }
+
+        clienteEnEdicion = new();
+        await CargarClientes();
+    }
+
+    private void EditarCliente(Cliente cliente)
+    {
+        clienteEnEdicion = new Cliente
+        {
+            IdCliente = cliente.IdCliente,
+            Nombre = cliente.Nombre,
+            Email = cliente.Email,
+            Telefono = cliente.Telefono
+        };
+    }
+
+    private void CancelarEdicion()
+    {
+        clienteEnEdicion = new();
+    }
+
+    private async Task EliminarCliente(int id)
+    {
+        await ClienteService.EliminarClienteAsync(id);
+        await CargarClientes();
+    }
+}

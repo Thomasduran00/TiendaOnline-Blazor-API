@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="tiendaonline.api/tiendaonline.api.csproj" DisplayName="TiendaOnline.API" Id="80c679df-f785-46cd-9740-ea5dd73af2f2" />
+  <Project Path="TiendaOnline.WASM/TiendaOnline.WASM.csproj" Id="12a1195d-96f2-43bd-ad73-aeab73939485" />
+</Solution>
